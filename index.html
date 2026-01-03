@@ -1,1 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Western Art Styles Flashcards</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            perspective: 1000px;
+        }
+
+        .title {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .card-wrapper {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .card-front {
+            background: white;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .art-sample {
+            width: 100%;
+            height: 180px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            pointer-events: none;
+        }
+
+        .style-name {
+            font-size: 2.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            pointer-events: none;
+        }
+
+        .style-period {
+            font-size: 1em;
+            margin-bottom: 12px;
+            font-style: italic;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .style-description {
+            font-size: 0.95em;
+            line-height: 1.5;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        .artists-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+            color: white;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+            pointer-events: none;
+        }
+
+        .artists-list {
+            font-size: 1.05em;
+            line-height: 1.9;
+            list-style: none;
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            pointer-events: none;
+        }
+
+        .artists-list li {
+            margin: 10px 0;
+            padding: 12px 20px;
+            border-radius: 12px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            font-weight: 600;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            pointer-events: none;
+        }
+
+        .back-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .nav-button {
+            background: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            color: #667eea;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .nav-button:active {
+            transform: translateY(0);
+        }
+
+        .counter {
+            color: white;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .touch-zones {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            pointer-events: none;
+            z-index: 100;
+            border-radius: 20px;
+        }
+
+        .zone {
+            pointer-events: all;
+            cursor: pointer;
+        }
+
+        .zone-left:active {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px 0 0 20px;
+        }
+
+        .zone-center {
+            cursor: pointer;
+        }
+
+        .zone-center:active {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .zone-right:active {
+            background: rgba(255,255,255,0.1);
+            border-radius: 0 20px 20px 0;
+        }
+
+        .instructions {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            margin-top: 15px;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 480px) {
+            .style-name {
+                font-size: 1.8em;
+            }
+            
+            .card-face {
+                padding: 25px 20px;
+            }
+
+            .art-sample {
+                height: 150px;
+            }
+
+            .nav-button {
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+
+            .title {
+                font-size: 1.5em;
+            }
+
+            .card-wrapper {
+                height: 480px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🎨 Western Art Styles</h1>
+        
+        <div class="card-wrapper">
+            <div class="card" id="card">
+                <div class="touch-zones">
+                    <div class="zone zone-left" onclick="previousCard()"></div>
+                    <div class="zone zone-center" onclick="flipCard()"></div>
+                    <div class="zone zone-right" onclick="nextCard()"></div>
+                </div>
+                
+                <div class="card-face card-front" id="cardFront">
+                    <div class="art-sample" id="artSample"></div>
+                    <h2 class="style-name" id="styleName"></h2>
+                    <p class="style-period" id="stylePeriod"></p>
+                    <p class="style-description" id="styleDescription"></p>
+                </div>
+                
+                <div class="card-face card-back" id="cardBack">
+                    <div class="back-pattern" id="backPattern"></div>
+                    <h3 class="artists-title" id="artistsTitle">Key Artists</h3>
+                    <ul class="artists-list" id="artistsList"></ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <button class="nav-button" onclick="previousCard()">← Prev</button>
+            <div class="counter" id="counter"></div>
+            <button class="nav-button" onclick="nextCard()">Next →</button>
+        </div>
+
+        <p class="instructions">
+            Tap center to flip • Tap left/right sides to navigate
+        </p>
+    </div>
+
+    <script>
+        const artStyles = [
+            {
+                name: "Gothic",
+                period: "12th-16th Century",
+                description: "Medieval art characterized by pointed arches, ribbed vaults, flying buttresses, and intricate stained glass. Emphasized verticality and light.",
+                artists: ["Giotto di Bondone", "Duccio di Buoninsegna", "Simone Martini", "Jan van Eyck", "Hieronymus Bosch"],
+                color: "#2C3E50",
+                svg: `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="gothicGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#34495e;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#2c3e50;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="300" height="180" fill="url(#gothicGrad)"/>
+                    <path d="M 70 160 L 70 80 L 100 40 L 130 80 L 130 160" fill="none" stroke="#ecf0f1" stroke-width="3"/>
+                    <path d="M 170 160 L 170 80 L 200 40 L 230 80 L 230 160" fill="none" stroke="#ecf0f1" stroke-width="3"/>
+                    <circle cx="100" cy="100" r="15" fill="#e74c3c" opacity="0.7"/>
+                    <circle cx="200" cy="100" r="15" fill="#3498db" opacity="0.7"/>
+                    <path d="M 100 40 L 105 50 L 95 50 Z" fill="#f39c12"/>
+                    <path d="M 200 40 L 205 50 L 195 50 Z" fill="#f39c12"/>
+                </svg>`
+            },
+            {
+                name: "Renaissance",
+                period: "14th-17th Century",
+                description: "Rebirth of classical art emphasizing realism, perspective, humanism, and balance. Focus on anatomy, proportion, and naturalistic detail.",
+                artists: ["Leonardo da Vinci", "Michelangelo", "Raphael", "Sandro Botticelli", "Titian"],
+                color: "#D4A574",
+                svg: `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="renGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#e8c4a0;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#d4a574;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="300" height="180" fill="url(#renGrad)"/>
+                    <circle cx="150" cy="90" r="60" fill="none" stroke="#8b6f47" stroke-width="2"/>
+                    <circle cx="150" cy="90" r="45" fill="none" stroke="#8b6f47" stroke-width="2"/>
+                    <line x1="90" y1="90" x2="210" y2="90" stroke="#8b6f47" stroke-width="2"/>
+                    <line x1="150" y1="30" x2="150" y2="150" stroke="#8b6f47" stroke-width="2"/>
+                    <circle cx="150" cy="90" r="5" fill="#8b6f47"/>
+                    <path d="M 150 30 L 180 60 L 210 90 L 180 120 L 150 150 L 120 120 L 90 90 L 120 60 Z" fill="none" stroke="#a0826d" stroke-width="1.5"/>
+                </svg>`
+            },
+            {
+                name: "Baroque",
+                period: "17th-18th Century",
+                description: "Dramatic, ornate style featuring intense emotions, rich colors, dramatic lighting (chiaroscuro), and dynamic movement. Grand and theatrical.",
+                artists: ["Caravaggio", "Peter Paul Rubens", "Rembrandt van Rijn", "Diego Velázquez", "Gian Lorenzo Bernini"],
+                color: "#8B4513",
+                svg: `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <radialGradient id="baroqueGrad">
+                            <stop offset="30%" style="stop-color:#f4e4c1;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#3d2817;stop-opacity:1" />
+                        </radialGradient>
+                    </defs>
+                    <rect width="300" height="180" fill="url(#baroqueGrad)"/>
+                    <path d="M 50 140 Q 80 40, 150 90 T 250 140" fill="none" stroke="#d4af37" stroke-width="4" opacity="0.8"/>
+                    <path d="M 60 100 Q 100 60, 150 120 T 240 100" fill="none" stroke="#cd853f" stroke-width="3" opacity="0.6"/>
+                    <circle cx="120" cy="70" r="25" fill="#f4e4c1" opacity="0.3"/>
+                    <circle cx="180" cy="110" r="30" fill="#f4e4c1" opacity="0.4"/>
+                </svg>`
+            },
+            {
+                name: "Rococo",
+                period: "18th Century",
+                description: "Ornate, decorative style with pastel colors, delicate curves, playful themes, and elaborate ornamentation. Lighthearted and elegant.",
+                artists: ["Jean-Honoré Fragonard", "François Boucher", "Antoine Watteau", "Jean-Baptiste Chardin", "Giovanni Battista Tiepolo"],
+                color: "#F4C2C2",
+                svg: `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="rococoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ffd6e7;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#c5e1ff;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="300" height="180" fill="url(#rococoGrad)"/>
+                    <path d="M 50 90 Q 80 50, 100 90 T 150 90 T 200 90 T 250 90" fill="none" stroke="#e8a0bf" stroke-width="3"/>
+                    <path d="M 70 120 Q 90 100, 110 120 T 150 120 T 190 120 T 230 120" fill="none" stroke="#b8d4f1" stroke-width="2.5"/>
+                    <circle cx="100" cy="70" r="8" fill="#ffb6d9"/>
+                    <circle cx="150" cy="65" r="10" fill="#ffd4e5"/>
+                    <circle cx="200" cy="70" r="8" fill="#d4a5ff"/>
+                </svg>`
+            },
+            {
+                name: "Romanticism",
+                period: "Late 18th-Mid 19th Century",
+                description: "Emphasized emotion, imagination, nature, and individualism. Dramatic landscapes, exotic subjects, and intense emotional expression.",
+                artists: ["Caspar David Friedrich", "J.M.W. Turner", "Eugène Delacroix", "Francisco Goya", "John Constable"],
+                color: "#1B4965",
+                svg: `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="romGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#62b6cb;stop-opacity:1" />
+                            <stop offset="50%" style="stop-color:#5fa8d3;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#1b4965;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="300" height="180" fill="url(#romGrad)"/>
+                    <path d="M 0 120 Q 60 80, 120 100 T 240 110 L 300 110 L 300 180 L 0 180 Z" fill="#2d5d3f" opacity="0.7"/>
+                    <path d="M 0 140 L 80 130 L 150 145 L 220 135 L 300 140 L 300 180 L 0 180 Z" fill="#1a3a2e" opacity="0.8"/>
+                    <circle cx="230" cy="50" r="20" fill="#ffd700" opacity="0.6"/>
+                    <path d="M 80 80 L 85 60 L 90 80" fill="#2d4a3e" opacity="0.5"/>
+                </svg>`
+            },
+            {
+                name: "Impressionism",
+                period: "1860s-1880s",
+                description: "Captured fleeting moments and effects of light through loose brushwork, bright colors, and outdoor scenes. Focus on visual impression over detail.",
+                artists: ["Claude Monet", "Pierre-Auguste Renoir", "Edgar Degas", "Camille Pissarro", "Berthe Morisot"],
+                color: "#7FB3D5",
+                svg: `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="impGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#aed6f1;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#f9e79f;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="300" height="180" fill="url(#impGrad)"/>
+                    <ellipse cx="80" cy="70" rx="15" ry="10" fill="#85c1e9" opacity="0.6"/>
+                    <ellipse cx="110" cy="85" rx="12" ry="8" fill="#76d7c4" opacity="0.5"/>
+                    <ellipse cx="140" cy="75" rx="18" ry="12" fill="#aed6f1" opacity="0.6"/>
+                    <ellipse cx="170" cy="90" rx="14" ry="9" fill="#f8c471" opacity="0.5"/>
+                    <ellipse cx="200" cy="80" rx="16" ry="11" fill="#f9e79f" opacity="0.6"/>
+                    <ellipse cx="230" cy="95" rx="13" ry="8" fill="#f5b7b1" opacity="0.5"/>
+                    <ellipse cx="100" cy="120" rx="20" ry="15" fill="#c39bd3" opacity="0.4"/>
+                    <ellipse cx="180" cy="125" rx="25" ry="18" fill="#abebc6" opacity="0.4"/>
+                </svg>`
+            },
+            {
+                name: "Post-Impressionism",
+                period: "1880s-1900s",
+                description: "Moved beyond Impressionism with symbolic content, geometric forms, and emotional expression. Individual artistic vision emphasized.",
+                artists: ["Vincent van Gogh", "Paul Cézanne", "Paul Gauguin", "Georges Seurat", "Henri de Toulouse-Lautrec"],
+                color: "#E67E22",
+                svg: `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="300" height="180" fill="#f39c12"/>
+                    <path d="M 0 90 Q 50 60, 100 90 T 200 90 T 300 90" fill="#e74c3c" opacity="0.7"/>
+                    <path d="M 0 120 Q 60 100, 120 120 T 240 120 T 300 120" fill="#3498db" opacity="0.6"/>
+                    <circle cx="80" cy="60" r="20" fill="#2ecc71" opacity="0.8"/>
+                    <circle cx="180" cy="70" r="25" fill="#9b59b6" opacity="0.7"/>
+                    <rect x="120" y="40" width="60" height="40" fill="#1abc9c" opacity="0.6" transform="rotate(-15 150 60)"/>
+                </svg>`
+            },
+            {
+                name: "Pointillism",
+                period: "1880s-1890s",
+                description: "Technique using small, distinct dots of pure color applied in patterns to form images. Based on scientific color theory and optical mixing.",
+                artists: ["Georges Seurat", "Paul Signac", "Henri-Edmond Cross", "Camille Pissarro", "Maximilien Luce"],
+                color: "#58D68D",
+                svg: `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="pointGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#abebc6;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#f8c471;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="300" height="180" fill="url(#pointGrad)"/>
+                    <circle cx="40" cy="30" r="4" fill="#e74c3c"/>
+                    <circle cx="60" cy="40" r="4" fill="#3498db"/>
+                    <circle cx="80" cy="35" r="4" fill="#f39c12"/>
+                    <circle cx="100" cy="45" r="4" fill="#9b59b6"/>
+                    <circle cx="120" cy="30" r="4" fill="#1abc9c"/>
+                    <circle cx="140" cy="50" r="4" fill="#e67e22"/>
+                    <circle cx="160" cy="35" r="4" fill="#2ecc71"/>
+                    <circle cx="180" cy="45" r="4" fill="#e74c3c"/>
+                    <circle cx="200" cy="30" r="4" fill="#3498db"/>
+                    <circle cx="220" cy="40" r="4" fill="#f39c12"/>
+                    <circle cx="240" cy="35" r="4" fill="#9b59b6"/>
+                    <circle cx="260" cy="45" r="4" fill="#1abc9c"/>
+                    <circle cx="50" cy="70" r="4" fill="#2ecc71"/>
+                    <circle cx="70" cy="80" r="4" fill="#e67e22"/>
+                    <circle cx="90" cy="75" r="4" fill="#e74c3c"/>
+                    <circle cx="110" cy="85" r="4" fill="#3498db"/>
+                    <circle cx="130" cy="70" r="4" fill="#f39c12"/>
+                    <circle cx="150" cy="90" r="4" fill="#9b59b6"/>
+                    <circle cx="170" cy="75" r="4" fill="#1abc9c"/>
+                    <circle cx="190" cy="85" r="4" fill="#e67e22"/>
+                    <circle cx="210" cy="70" r="4" fill="#2ecc71"/>
+                    <circle cx="230" cy="80" r="4" fill="#e74c3c"/>
+                    <circle cx="250" cy="75" r="4" fill="#3498db"/>
+                    <circle cx="40" cy="110" r="4" fill="#f39c12"/>
+                    <circle cx="60" cy="120" r="4" fill="#9b59b6"/>
+                    <circle cx="80" cy="115" r="4" fill="#1abc9c"/>
+                    <circle cx="100" cy="125" r="4" fill="#e67e22"/>
+                    <circle cx="120" cy="110" r="4" fill="#2ecc71"/>
+                    <circle cx="140" cy="130" r="4" fill="#e74c3c"/>
+                    <circle cx="160" cy="115" r="4" fill="#3498db"/>
+                    <circle cx="180" cy="125" r="4" fill="#f39c12"/>
+                    <circle cx="200" cy="110" r="4" fill="#9b59b6"/>
+                    <circle cx="220" cy="120" r="4" fill="#1abc9c"/>
+                    <circle cx="240" cy="115" r="4" fill="#e67e22"/>
+                    <circle cx="260" cy="125" r="4" fill="#2ecc71"/>
+                    <circle cx="50" cy="150" r="4" fill="#e74c3c"/>
+                    <circle cx="70" cy="160" r="4" fill="#3498db"/>
+                    <circle cx="90" cy="155" r="4" fill="#f39c12"/>
+                    <circle cx="110" cy="165" r="4" fill="#9b59b6"/>
+                    <circle cx="130" cy="150" r="4" fill="#1abc9c"/>
+                    <circle cx="150" cy="170" r="4" fill="#e67e22"/>
+                    <circle cx="170" cy="155" r="4" fill="#2ecc71"/>
+                    <circle cx="190" cy="165" r="4" fill="#e74c3c"/>
+                    <circle cx="210" cy="150" r="4" fill="#3498db"/>
+                    <circle cx="230" cy="160" r="4" fill="#f39c12"/>
+                    <circle cx="250" cy="155" r="4" fill="#9b59b6"/>
+                </svg>`
+            },
+            {
+                name: "Art Nouveau",
+                period: "1890-1910",
+                description: "Decorative style featuring flowing, organic lines, natural forms, and stylized botanical motifs. Emphasized craftsmanship and total design.",
+                artists: ["Alphonse Mucha", "Gustav Klimt", "Aubrey Beardsley", "Henri de Toulouse-Lautrec", "Antoni Gaudí"],
+                color: "#52B788",
+                svg: `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="artNouveauGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#95d5b2;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#52b788;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="300" height="180" fill="url(#artNouveauGrad)"/>
+                    <path d="M 150 160 Q 140 120, 150 80 Q 160 120, 150 160" fill="none" stroke="#2d6a4f" stroke-width="3"/>
+                    <path d="M 150 80 Q 130 70, 120 50 Q 110 60, 100 50" fill="none" stroke="#2d6a4f" stroke-width="2"/>
+                    <path d="M 150 80 Q 170 70, 180 50 Q 190 60, 200 50" fill="none" stroke="#2d6a4f" stroke-width="2"/>
+                    <ellipse cx="100" cy="45" rx="8" ry="12" fill="#d4a373" opacity="0.8"/>
+                    <ellipse cx="200" cy="45" rx="8" ry="12" fill="#d4a373" opacity="0.8"/>
+                    <path d="M 100 100 Q 80 110, 70 130" fill="none" stroke="#40916c" stroke-width="2.5"/>
+                    <path d="M 200 100 Q 220 110, 230 130" fill="none" stroke="#40916c" stroke-width="2.5"/>
+                    <circle cx="70" cy="130" r="6" fill="#ffd6a5"/>
+                    <circle cx="230" cy="130" r="6" fill="#ffd6a5"/>
+                </svg>`
+            },
+            {
+                name: "Fauvism",
+                period: "1905-1910",
+                description: "Wild, vibrant colors applied in bold brushstrokes. Simplified forms and pure color to express emotion rather than represent reality.",
+                artists: ["Henri Matisse", "André Derain", "Maurice de Vlaminck", "Raoul Dufy", "Georges Braque"],
+                color: "#E63946",
+                svg: `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="300" height="180" fill="#f72585"/>
+                    <rect x="0" y="0" width="100" height="60" fill="#b5179e"/>
+                    <rect x="100" y="0" width="100" height="60" fill="#7209b7"/>
+                    <rect x="200" y="0" width="100" height="60" fill="#560bad"/>
+                    <rect x="0" y="60" width="100" height="60" fill="#4cc9f0"/>
+                    <rect x="100" y="60" width="100" height="60" fill="#4895ef"/>
+                    <rect x="200" y="60" width="100" height="60" fill="#4361ee"/>
+                    <rect x="0" y="120" width="100" height="60" fill="#f72585"/>
+                    <rect x="100" y="120" width="100" height="60" fill="#b5179e"/>
+                    <rect x="200" y="120" width="100" height="60" fill="#7209b7"/>
+                    <circle cx="50" cy="30" r="15" fill="#ffbe0b" opacity="0.7"/>
+                    <circle cx="250" cy="150" r="20" fill="#fb5607" opacity="0.7"/>
+                    <rect x="140" y="80" width="20" height="20" fill="#ffbe0b" transform="rotate(45 150 90)"/>
+                </svg>`
+            },
+            {
+                name: "Cubism",
+                period: "1907-1920s",
+                description: "Revolutionary style showing subjects from multiple viewpoints simultaneously. Fragmented forms, geometric shapes, and flattened picture plane.",
+                artists: ["Pablo Picasso", "Georges Braque", "Juan Gris", "Fernand Léger", "Robert Delaunay"],
+                color: "#8D99AE",
+                svg: `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="300" height="180" fill="#edf2f4"/>
+                    <polygon points="50,40 100,30 120,80 70,90" fill="#8d99ae"/>
+                    <polygon points="100,30 150,50 130,100 120,80" fill="#2b2d42"/>
+                    <polygon points="150,50 200,40 180,90 130,100" fill="#8d99ae" opacity="0.7"/>
+                    <polygon points="70,90 120,80 140,130 90,140" fill="#ef233c"/>
+                    <polygon points="120,80 130,100 150,140 140,130" fill="#d90429"/>
+                    <polygon points="180,90 200,40 250,60 230,110" fill="#2b2d42" opacity="0.8"/>
+                    <polygon points="140,130 150,140 180,150 170,130" fill="#8d99ae"/>
+                    <polygon points="180,90 230,110 210,150 180,150" fill="#ef233c" opacity="0.7"/>
+                </svg>`
+            },
+            {
+                name: "Expressionism",
+                period: "1905-1920s",
+                description: "Distorted forms and exaggerated colors to evoke emotional response. Subjective, often angst-filled perspective on modern life.",
+                artists: ["Edvard Munch", "Egon Schiele", "Ernst Ludwig Kirchner", "Wassily Kandinsky", "Emil Nolde"],
+                color: "#C9463D",
+                svg: `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="expGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ff6b6b;stop-opacity:1" />
+                            <stop offset="50%" style="stop-color:#4ecdc4;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#1a1a2e;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="300" height="180" fill="url(#expGrad)"/>
+                    <path d="M 80 50 Q 100 30, 120 50 Q 140 70, 160 50 Q 180 30, 200 50" fill="none" stroke="#f4442e" stroke-width="6" opacity="0.7"/>
+                    <path d="M 60 100 Q 90 80, 120 100 Q 150 120, 180 100 Q 210 80, 240 100" fill="none" stroke="#ffd700" stroke-width="5" opacity="0.6"/>
+                    <ellipse cx="150" cy="140" rx="60" ry="25" fill="#16213e" opacity="0.5" transform="rotate(-10 150 140)"/>
+                    <path d="M 100 90 L 105 110 L 95 110 Z" fill="#ee4540"/>
+                    <path d="M 200 95 L 205 115 L 195 115 Z" fill="#c81d25"/>
+                </svg>`
+            },
+            {
+                name: "Surrealism",
+                period: "1920s-1940s",
+                description: "Explored unconscious mind through dreamlike, bizarre imagery. Combined realistic technique with irrational juxtapositions and automatism.",
+                artists: ["Salvador Dalí", "René Magritte", "Max Ernst", "Joan Miró", "André Breton"],
+                color: "#5E60CE",
+                svg: `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="surrGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#5e60ce;stop-opacity:1" />
+                            <stop offset="50%" style="stop-color:#7209b7;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#f72585;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="300" height="180" fill="url(#surrGrad)"/>
+                    <ellipse cx="150" cy="80" rx="50" ry="35" fill="#ffd60a" opacity="0.6" transform="rotate(25 150 80)"/>
+                    <circle cx="100" cy="100" r="15" fill="#06ffa5" opacity="0.7"/>
+                    <rect x="160" y="120" width="40" height="50" fill="none" stroke="#fffffc" stroke-width="3" rx="5"/>
+                    <path d="M 50 140 Q 80 110, 110 140" fill="none" stroke="#ff006e" stroke-width="4"/>
+                    <circle cx="230" cy="60" r="8" fill="#06ffa5"/>
+                    <polygon points="250,130 270,160 230,160" fill="#ffd60a" opacity="0.7"/>
+                    <line x1="190" y1="50" x2="210" y2="30" stroke="#fffffc" stroke-width="2"/>
+                    <circle cx="210" cy="30" r="5" fill="#fffffc"/>
+                </svg>`
+            },
+            {
+                name: "Abstract Expressionism",
+                period: "1940s-1950s",
+                description: "Large-scale works emphasizing spontaneous, automatic, or subconscious creation. Action painting and color field painting emerged.",
+                artists: ["Jackson Pollock", "Mark Rothko", "Willem de Kooning", "Barnett Newman", "Franz Kline"],
+                color: "#212529",
+                svg: `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="300" height="180" fill="#212529"/>
+                    <path d="M 20 50 Q 80 30, 120 70 T 200 90 T 280 60" fill="none" stroke="#fff" stroke-width="3" opacity="0.8"/>
+                    <path d="M 40 100 Q 90 80, 140 110 T 240 100" fill="none" stroke="#e63946" stroke-width="4" opacity="0.7"/>
+                    <path d="M 60 140 L 100 120 L 140 150 L 180 130 L 220 145" fill="none" stroke="#f1faee" stroke-width="2.5" opacity="0.6"/>
+                    <circle cx="150" cy="90" r="30" fill="none" stroke="#a8dadc" stroke-width="5" opacity="0.5"/>
+                    <rect x="200" y="120" width="40" height="50" fill="#457b9d" opacity="0.6"/>
+                    <path d="M 80 160 L 120 140 L 100 170" fill="#e63946" opacity="0.5"/>
+                </svg>`
+            },
+            {
+                name: "Pop Art",
+                period: "1950s-1960s",
+                description: "Incorporated imagery from popular culture, mass media, advertising, and consumer products. Bold colors, irony, and accessible imagery.",
+                artists: ["Andy Warhol", "Roy Lichtenstein", "David Hockney", "Jasper Johns", "Robert Rauschenberg"],
+                color: "#FF006E",
+                svg: `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="300" height="180" fill="#ffbe0b"/>
+                    <rect x="0" y="0" width="150" height="90" fill="#fb5607"/>
+                    <rect x="150" y="0" width="150" height="90" fill="#ff006e"/>
+                    <rect x="0" y="90" width="150" height="90" fill="#8338ec"/>
+                    <rect x="150" y="90" width="150" height="90" fill="#3a86ff"/>
+                    <circle cx="75" cy="45" r="25" fill="#ffbe0b" stroke="#000" stroke-width="3"/>
+                    <circle cx="225" cy="45" r="25" fill="#fb5607" stroke="#000" stroke-width="3"/>
+                    <rect x="50" y="110" width="50" height="50" fill="#ff006e" stroke="#000" stroke-width="3"/>
+                    <polygon points="200,110 250,110 225,160" fill="#ffbe0b" stroke="#000" stroke-width="3"/>
+                    <text x="75" y="50" font-family="Arial" font-size="24" font-weight="bold" fill="#000" text-anchor="middle">★</text>
+                    <text x="225" y="50" font-family="Arial" font-size="24" font-weight="bold" fill="#000" text-anchor="middle">♥</text>
+                </svg>`
+            },
+            {
+                name: "Neoclassicism",
+                period: "1760s-1850s",
+                description: "Revival of classical Greek and Roman art emphasizing order, symmetry, and simplicity. Heroic subjects with moral virtue and civic duty.",
+                artists: ["Jacques-Louis David", "Jean-Auguste-Dominique Ingres", "Antonio Canova", "Angelica Kauffman", "John Flaxman"],
+                color: "#C0A080",
+                svg: `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="neoGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#e8d4b8;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#c0a080;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="300" height="180" fill="url(#neoGrad)"/>
+                    <rect x="60" y="50" width="180" height="100" fill="none" stroke="#8b7355" stroke-width="3"/>
+                    <circle cx="150" cy="100" r="40" fill="none" stroke="#8b7355" stroke-width="2.5"/>
+                    <line x1="60" y1="50" x2="240" y2="50" stroke="#8b7355" stroke-width="4"/>
+                    <rect x="70" y="40" width="10" height="20" fill="#8b7355"/>
+                    <rect x="145" y="40" width="10" height="20" fill="#8b7355"/>
+                    <rect x="220" y="40" width="10" height="20" fill="#8b7355"/>
+                    <path d="M 90 150 L 90 80 M 120 150 L 120 80 M 180 150 L 180 80 M 210 150 L 210 80" stroke="#8b7355" stroke-width="2"/>
+                </svg>`
+            },
+            {
+                name: "Realism",
+                period: "1840s-1880s",
+                description: "Depicted everyday life and ordinary people without idealization. Focused on contemporary subjects, social issues, and truthful representation.",
+                artists: ["Gustave Courbet", "Jean-François Millet", "Honoré Daumier", "Winslow Homer", "Thomas Eakins"],
+                color: "#6B5D4F",
+                svg: `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="realGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#9e8b7b;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#6b5d4f;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="300" height="180" fill="url(#realGrad)"/>
+                    <path d="M 0 120 L 80 110 L 150 125 L 220 115 L 300 130 L 300 180 L 0 180 Z" fill="#4a3f35" opacity="0.7"/>
+                    <rect x="60" y="80" width="35" height="50" fill="#3d3329" opacity="0.8"/>
+                    <rect x="200" y="70" width="30" height="60" fill="#3d3329" opacity="0.8"/>
+                    <circle cx="150" cy="60" r="15" fill="#d4a574" opacity="0.6"/>
+                    <path d="M 140 75 L 150 90 L 160 75" fill="#5c4f42" opacity="0.7"/>
+                </svg>`
+            },
+            {
+                name: "Symbolism",
+                period: "1880s-1910s",
+                description: "Used symbolic imagery and indirect suggestion to express mystical ideas, emotions, and psychological states. Emphasized imagination over realism.",
+                artists: ["Gustave Moreau", "Odilon Redon", "Arnold Böcklin", "Pierre Puvis de Chavannes", "Fernand Khnopff"],
+                color: "#6A4C93",
+                svg: `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <radialGradient id="symbGrad">
+                            <stop offset="20%" style="stop-color:#9d84b7;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#6a4c93;stop-opacity:1" />
+                        </radialGradient>
+                    </defs>
+                    <rect width="300" height="180" fill="url(#symbGrad)"/>
+                    <circle cx="150" cy="70" r="35" fill="#c8b6e2" opacity="0.4"/>
+                    <path d="M 150 35 L 155 55 L 175 55 L 160 67 L 165 87 L 150 75 L 135 87 L 140 67 L 125 55 L 145 55 Z" fill="#d4af37" opacity="0.6"/>
+                    <ellipse cx="100" cy="130" rx="30" ry="20" fill="#8b7aa8" opacity="0.5"/>
+                    <ellipse cx="200" cy="140" rx="35" ry="25" fill="#9d84b7" opacity="0.5"/>
+                    <path d="M 150 90 Q 150 110, 170 120" fill="none" stroke="#c8b6e2" stroke-width="2" opacity="0.7"/>
+                </svg>`
+            },
+            {
+                name: "Dadaism",
+                period: "1916-1920s",
+                description: "Anti-art movement rejecting logic and reason. Used absurdity, irrationality, and chance to challenge artistic conventions and bourgeois values.",
+                artists: ["Marcel Duchamp", "Man Ray", "Hannah Höch", "Francis Picabia", "Kurt Schwitters"],
+                color: "#D62828",
+                svg: `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="300" height="180" fill="#fcbf49"/>
+                    <rect x="40" y="30" width="60" height="80" fill="#d62828" transform="rotate(15 70 70)"/>
+                    <circle cx="200" cy="60" r="30" fill="#003049"/>
+                    <polygon points="150,120 180,160 120,160" fill="#d62828" transform="rotate(-25 150 140)"/>
+                    <rect x="220" y="100" width="50" height="50" fill="none" stroke="#003049" stroke-width="4" transform="rotate(30 245 125)"/>
+                    <text x="100" y="140" font-family="Arial" font-size="36" font-weight="bold" fill="#003049" transform="rotate(10 100 140)">?</text>
+                    <circle cx="250" cy="40" r="8" fill="#d62828"/>
+                    <line x1="20" y1="150" x2="80" y2="170" stroke="#003049" stroke-width="3"/>
+                </svg>`
+            },
+            {
+                name: "Constructivism",
+                period: "1915-1930s",
+                description: "Russian avant-garde movement using industrial materials and geometric forms. Art serving social and political purposes with utilitarian design.",
+                artists: ["Vladimir Tatlin", "El Lissitzky", "Alexander Rodchenko", "Lyubov Popova", "Varvara Stepanova"],
+                color: "#C1121F",
+                svg: `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="300" height="180" fill="#f8f9fa"/>
+                    <rect x="50" y="40" width="80" height="100" fill="#c1121f"/>
+                    <rect x="140" y="60" width="60" height="80" fill="#003049"/>
+                    <circle cx="240" cy="90" r="40" fill="#ffc300"/>
+                    <polygon points="80,30 120,10 160,30 160,70 120,90 80,70" fill="none" stroke="#780000" stroke-width="3"/>
+                    <line x1="50" y1="140" x2="200" y2="60" stroke="#c1121f" stroke-width="4"/>
+                    <rect x="220" y="140" width="60" height="30" fill="#003049"/>
+                </svg>`
+            },
+            {
+                name: "Art Deco",
+                period: "1920s-1940s",
+                description: "Elegant, decorative style combining modernism with fine craftsmanship. Geometric patterns, rich colors, and luxurious materials with streamlined forms.",
+                artists: ["Tamara de Lempicka", "Erté", "Adolphe Mouron Cassandre", "Eileen Gray", "René Lalique"],
+                color: "#C9ADA7",
+                svg: `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="decoGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#9a8c98;stop-opacity:1" />
+                            <stop offset="50%" style="stop-color:#c9ada7;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#4a4e69;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="300" height="180" fill="url(#decoGrad)"/>
+                    <path d="M 150 20 L 180 60 L 210 100 L 180 100 L 150 140 L 120 100 L 90 100 L 120 60 Z" fill="#f2cc8f" opacity="0.8"/>
+                    <circle cx="150" cy="80" r="30" fill="none" stroke="#22223b" stroke-width="3"/>
+                    <path d="M 50 160 L 80 120 L 110 140 L 140 100 L 170 140 L 200 120 L 230 140 L 260 120" fill="none" stroke="#f2cc8f" stroke-width="4"/>
+                    <rect x="135" y="150" width="30" height="20" fill="#22223b"/>
+                </svg>`
+            },
+            {
+                name: "Futurism",
+                period: "1909-1944",
+                description: "Celebrated speed, technology, and dynamic movement. Depicted energy and motion through fragmented forms suggesting simultaneity and progression.",
+                artists: ["Umberto Boccioni", "Giacomo Balla", "Gino Severini", "Carlo Carrà", "Luigi Russolo"],
+                color: "#E85D04",
+                svg: `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="300" height="180" fill="#023047"/>
+                    <path d="M 0 90 L 50 80 L 100 95 L 150 70 L 200 85 L 250 75 L 300 90" fill="none" stroke="#ffb703" stroke-width="4"/>
+                    <path d="M 0 100 L 50 110 L 100 95 L 150 115 L 200 100 L 250 120 L 300 105" fill="none" stroke="#fb8500" stroke-width="4"/>
+                    <polygon points="80,40 100,50 90,70 70,60" fill="#e85d04" opacity="0.8"/>
+                    <polygon points="120,30 140,45 135,65 115,50" fill="#fb8500" opacity="0.7"/>
+                    <polygon points="160,35 185,50 175,70 150,55" fill="#ffb703" opacity="0.8"/>
+                    <polygon points="200,25 225,40 215,65 190,50" fill="#e85d04" opacity="0.7"/>
+                    <line x1="60" y1="120" x2="240" y2="60" stroke="#ffb703" stroke-width="3" opacity="0.6"/>
+                    <line x1="80" y1="140" x2="220" y2="80" stroke="#fb8500" stroke-width="2" opacity="0.5"/>
+                </svg>`
+            },
+            {
+                name: "De Stijl",
+                period: "1917-1931",
+                description: "Dutch movement using only primary colors, black, white, and geometric forms. Pure abstraction seeking universal harmony through simplified visual elements.",
+                artists: ["Piet Mondrian", "Theo van Doesburg", "Gerrit Rietveld", "Bart van der Leck", "Vilmos Huszár"],
+                color: "#0353A4",
+                svg: `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="300" height="180" fill="#ffffff"/>
+                    <rect x="0" y="0" width="120" height="70" fill="#de1f32"/>
+                    <rect x="120" y="0" width="180" height="70" fill="#ffffff" stroke="#000" stroke-width="4"/>
+                    <rect x="0" y="70" width="120" height="50" fill="#0353a4"/>
+                    <rect x="120" y="70" width="80" height="50" fill="#ffd60a"/>
+                    <rect x="200" y="70" width="100" height="50" fill="#ffffff" stroke="#000" stroke-width="4"/>
+                    <rect x="0" y="120" width="120" height="60" fill="#ffffff" stroke="#000" stroke-width="4"/>
+                    <rect x="120" y="120" width="80" height="60" fill="#de1f32"/>
+                    <rect x="200" y="120" width="100" height="60" fill="#0353a4"/>
+                    <line x1="120" y1="0" x2="120" y2="180" stroke="#000" stroke-width="5"/>
+                    <line x1="200" y1="70" x2="200" y2="180" stroke="#000" stroke-width="5"/>
+                    <line x1="0" y1="70" x2="300" y2="70" stroke="#000" stroke-width="5"/>
+                    <line x1="0" y1="120" x2="300" y2="120" stroke="#000" stroke-width="5"/>
+                </svg>`
+            },
+            {
+                name: "Minimalism",
+                period: "1960s-1970s",
+                description: "Stripped art to essential forms using geometric shapes, monochrome palettes, and industrial materials. Emphasized objecthood and viewer experience.",
+                artists: ["Donald Judd", "Dan Flavin", "Carl Andre", "Sol LeWitt", "Agnes Martin"],
+                color: "#495057",
+                svg: `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="300" height="180" fill="#f8f9fa"/>
+                    <rect x="60" y="40" width="180" height="100" fill="none" stroke="#495057" stroke-width="2"/>
+                    <line x1="60" y1="90" x2="240" y2="90" stroke="#495057" stroke-width="1"/>
+                    <line x1="150" y1="40" x2="150" y2="140" stroke="#495057" stroke-width="1"/>
+                    <rect x="100" y="70" width="40" height="40" fill="#495057"/>
+                    <rect x="160" y="70" width="40" height="40" fill="none" stroke="#495057" stroke-width="2"/>
+                </svg>`
+            }
+        ];
+
+        let currentIndex = 0;
+        let isFlipped = false;
+
+        function updateCard() {
+            const style = artStyles[currentIndex];
+            
+            document.getElementById('styleName').textContent = style.name;
+            document.getElementById('styleName').style.color = style.color;
+            document.getElementById('stylePeriod').textContent = style.period;
+            document.getElementById('stylePeriod').style.color = style.color;
+            document.getElementById('styleDescription').textContent = style.description;
+            document.getElementById('styleDescription').style.color = style.color;
+            
+            document.getElementById('artSample').innerHTML = style.svg;
+            
+            const artistsList = document.getElementById('artistsList');
+            artistsList.innerHTML = '';
+            const colors = [
+                `${style.color}dd`,
+                `${style.color}cc`, 
+                `${style.color}bb`,
+                `${style.color}aa`,
+                `${style.color}99`
+            ];
+            
+            style.artists.forEach((artist, index) => {
+                const li = document.createElement('li');
+                li.textContent = '★ ' + artist;
+                li.style.background = `linear-gradient(135deg, ${colors[index]}, ${colors[(index + 1) % colors.length]})`;
+                artistsList.appendChild(li);
+            });
+            
+            // Create vibrant background pattern for card back
+            const backPattern = document.getElementById('backPattern');
+            const backSvg = style.svg.replace(/viewBox="0 0 300 180"/, 'viewBox="0 0 300 180" preserveAspectRatio="xMidYMid slice"');
+            backPattern.innerHTML = backSvg;
+            backPattern.style.opacity = '0.3';
+            backPattern.style.filter = 'blur(2px)';
+            
+            const artistsTitle = document.getElementById('artistsTitle');
+            artistsTitle.style.color = 'white';
+            
+            document.getElementById('counter').textContent = `${currentIndex + 1} / ${artStyles.length}`;
+        }
+
+        function flipCard() {
+            const card = document.getElementById('card');
+            isFlipped = !isFlipped;
+            card.classList.toggle('flipped');
+        }
+
+        function nextCard() {
+            if (isFlipped) {
+                flipCard();
+            }
+            currentIndex = (currentIndex + 1) % artStyles.length;
+            setTimeout(updateCard, 300);
+        }
+
+        function previousCard() {
+            if (isFlipped) {
+                flipCard();
+            }
+            currentIndex = (currentIndex - 1 + artStyles.length) % artStyles.length;
+            setTimeout(updateCard, 300);
+        }
+
+        updateCard();
+    </script>
+</body>
+</html>
